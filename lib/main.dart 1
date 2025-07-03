@@ -1,0 +1,110 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const RocketApp());
+}
+
+class RocketApp extends StatelessWidget {
+  const RocketApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Rocket Launch Animation',
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blue,
+      ),
+      home: const RocketLaunchScreen(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class RocketLaunchScreen extends StatefulWidget {
+  const RocketLaunchScreen({super.key});
+
+  @override
+  State<RocketLaunchScreen> createState() => _RocketLaunchScreenState();
+}
+
+class _RocketLaunchScreenState extends State<RocketLaunchScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    );
+
+    _animation = Tween<double>(begin: 1, end: -1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    // Repeat the animation indefinitely
+    _controller.repeat(reverse: false);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _buildRocket() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Flame at bottom with flickering effect
+        Positioned(
+          bottom: 0,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 10, end: 20),
+            duration: const Duration(milliseconds: 300),
+            builder: (context, size, child) {
+              return Icon(
+                Icons.local_fire_department,
+                color: Colors.orangeAccent,
+                size: size,
+              );
+            },
+            onEnd: () {
+              setState(() {});
+            },
+          ),
+        ),
+
+        // Rocket body - improved shape
+        Icon(
+          Icons.rocket_launch,
+          color: Colors.white,
+          size: 100,
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          return Align(
+            alignment: Alignment(0, _animation.value),
+            child: child,
+          );
+        },
+        child: _buildRocket(),
+      ),
+    );
+  }
+}
